@@ -80,9 +80,9 @@
 <body>
   <h1>🔮 QIMEN MM Lucky Number Generator</h1>
 
-  <label>开彩期号（如 200/25）：</label>
+  <label>MAGNUM DRAW NO.开彩期号（如 200/25）：</label>
   <input type="text" id="draw" placeholder="例如：200/25" /><br />
-  <label>幸运数字（0-9）：</label>
+  <label>LUCKY DIGIT NO.幸运数字（0-9）：</label>
   <input type="number" id="lucky" min="0" max="9" /><br />
   <button onclick="showAdThenGenerate()">🎰 看广告生成预测号码</button>
 
@@ -104,12 +104,15 @@
 
   <hr style="margin-top: 30px; border-color: #444;" />
   <p style="margin-top: 10px; font-size: 14px; color: #999; text-align: center; line-height: 1.6;">
-    使用说明：<br />
-    本软件为辅助工具，仅供娱乐用途。<br />
+  <div class="disclaimer">
+    <strong>使用说明：</strong><br />
+    本软件适用于 Malaysia 4D，Magnum Malaysia。<br />
+    请在输入框中填写开彩期号（格式如：200/25），然后选择您的幸运号码（0-9）。<br />
+    点击“看广告后生成幸运号码”按钮，即可获得当天幸运号码组合。<br />
+    本应用仅供娱乐用途，不涉及博彩或金钱交易。<br />
     This app is for entertainment purposes only and does not promote gambling.<br />
-    祝您好运！
-  </p>
-
+    Good luck!
+  </div>
 <script>
 const fiveElementPrefs = [1, 2, 3, 4];
 const goodNumbers = [16, 23, 31, 32, 52, 81];
