@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MM Lucky Number Generator</title>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: #000;
+      color: #ffd700;
+      padding: 20px;
+    }
+    h1 {
+      color: #ffeb3b;
+      font-size: 32px;
+    }
+    label {
+      font-weight: bold;
+    }
+    .grid-container {
+      display: flex;
+      gap: 40px;
+      margin-top: 20px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 60px);
+      gap: 5px;
+      margin-bottom: 10px;
+    }
+    .main-grid {
+      grid-template-rows: repeat(6, 60px);
+    }
+    .sub-grid {
+      grid-template-rows: repeat(3, 60px);
+    }
+    .cell {
+      border: 2px solid #ffa000;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      background: #212121;
+      color: #ffeb3b;
+      font-size: 20px;
+    }
+    input {
+      padding: 8px;
+      font-size: 16px;
+      background: #111;
+      color: #fff700;
+      border: 1px solid #ffa000;
+      border-radius: 4px;
+    }
+    button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      background-color: #ffeb3b;
+      color: #000;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background-color: #fff176;
+    }
+    .result {
+      margin-top: 20px;
+      white-space: pre-wrap;
+      background: #111;
+      padding: 15px;
+      border: 1px solid #ffb300;
+      min-height: 120px;
+      font-family: monospace;
+      color: #ffe082;
+    }
+    h3 {
+      color: #ffca28;
+    }
+    .disclaimer {
+      margin-top: 40px;
+      padding: 15px;
+      border: 1px solid #ffb300;
+      background: #222;
+      color: #ffd54f;
+      font-size: 14px;
+      line-height: 1.5;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔮 MM Lucky Number Generator </h1>
+  <label>MAGNUM DRAW NO./开彩期号（如 200/25）：</label>
+  <input type="text" id="draw" placeholder="例如：200/25" />
+  <br /><br />
+  <label>LUCKY DIGIT NUMBER/幸运数字（0-9）：</label>
+  <input type="number" id="lucky" min="0" max="9" />
+  <br />
+  <button onclick="generateAll()">🎰看广告 生成幸运号码</button>
+
+  <div class="grid-container">
+    <div>
+      <h3>主图（4×6）</h3>
+      <div class="grid main-grid" id="mainGrid"></div>
+    </div>
+    <div>
+      <h3>副图（4×3）</h3>
+      <div class="grid sub-grid" id="subGrid"></div>
+    </div>
+  </div>
+
+  <h3>🎯 预测号码（当天Lucky Number，含幸运数字）</h3>
+  <div class="result" id="result"></div>
+
+  <div class="disclaimer">
+    <strong>使用说明：</strong><br />
+    本软件为辅助工具，旨在帮助用户预测幸运数字。<br />
+    请在输入框中填写当天MAGNUM期号（格式如：200/25），<br />
+    然后选择您的幸运号码（0-9）。<br />
+    点击"生成预测号码"按钮，即可获得当天幸运号码列表。<br />
+    本软件为 MAGNUM 预测辅助工具，仅供娱乐用途，不涉及博彩或金钱交易。<br />
+    This app is for entertainment purposes only and does not promote gambling.<br />
+    祝您好运！
+  </div>
+
+  <script>
+    function generateMainGrid(digits, issueDigit) {
+      const grid = [];
+      grid[0] = [
+        (digits[0] + digits[1]) % 10,
+        (digits[1] + digits[2]) % 10,
+        (digits[2] + digits[0]) % 10,
+        (digits[0] + issueDigit) % 10,
+      ];
+      for (let r = 1; r < 6; r++) {
+        grid[r] = grid[r - 1].map((v) => (v + 6) % 10);
+      }
+      return grid;
+    }
+
+    function generateSubGrid(digits) {
+      let mainNum = digits[0] * 100 + digits[1] * 10 + digits[2];
+      mainNum = mainNum - 1;
+      if (mainNum < 0) mainNum = 999;
+      const mainDigits = [
+        Math.floor(mainNum / 100),
+        Math.floor((mainNum % 100) / 10),
+        mainNum % 10,
+      ];
+      const grid = Array.from({ length: 3 }, () => Array(4).fill(null));
+      grid[0][0] = mainDigits[0];
+      grid[1][1] = mainDigits[1];
+      grid[2][2] = mainDigits[2];
+      const positions = [
+        [2, 2], [1, 2], [0, 2], [0, 1], [1, 0],
+        [2, 0], [2, 1], [2, 3], [1, 3], [0, 3]
+      ];
+      let val = mainDigits[2];
+      for (let i = 1; i < positions.length; i++) {
+        val = (val + 1) % 10;
+        const [r, c] = positions[i];
+        grid[r][c] = val;
+      }
+      return grid;
+    }
+
+    function getShapes(grid) {
+      const result = [];
+      const h = grid.length;
+      const w = grid[0].length;
+
+      // 增强的L型识别（8个方向）
+      const lShapes = [
+        [[0,0],[1,0],[2,0],[2,1]],  // 左下L
+        [[0,1],[1,1],[2,1],[2,0]],  // 右下L
+        [[0,0],[0,1],[1,1],[2,1]],  // 左上L
+        [[0,1],[0,0],[1,0],[2,0]],  // 右上L
+        [[0,0],[0,1],[0,2],[1,0]],  // 左下横L
+        [[0,0],[0,1],[0,2],[1,2]],  // 右下横L
+        [[1,0],[1,1],[1,2],[0,0]],  // 左上横L
+        [[1,0],[1,1],[1,2],[0,2]]   // 右上横L
+      ];
+
+      // 增强的Z型识别（4个方向）
+      const zShapes = [
+        [[0,0],[0,1],[1,1],[1,2]], // 水平Z
+        [[1,0],[1,1],[0,1],[0,2]], // 水平反Z
+        [[0,0],[1,0],[1,1],[2,1]], // 垂直Z
+        [[0,1],[1,1],[1,0],[2,0]]  // 垂直反Z
+      ];
+
+      // 增强的T型识别（4个方向）
+      const tShapes = [
+        [[0,1],[1,0],[1,1],[1,2]], // 上T
+        [[1,1],[0,0],[0,1],[0,2]], // 下T
+        [[1,0],[0,1],[1,1],[2,1]], // 左T
+        [[1,1],[0,0],[1,0],[2,0]]  // 右T
+      ];
+
+      // 其他形状识别
+      const shapeOffsets = [
+        [[0,0],[0,1],[1,0],[1,1]],  // 方形
+        [[0,0],[1,0],[2,0],[3,0]],  // 垂直直线
+        [[0,0],[0,1],[0,2],[0,3]],  // 水平直线
+        [[0,0],[1,1],[2,2],[3,3]],  // 对角线
+        [[0,3],[1,2],[2,1],[3,0]]   // 反对角线
+      ];
+
+      // 检查所有L型
+      for (let r = 0; r < h; r++) {
+        for (let c = 0; c < w; c++) {
+          for (let shape of lShapes) {
+            const pos = shape.map(([dr, dc]) => [r + dr, c + dc]);
+            if (pos.every(([rr, cc]) => rr < h && cc < w)) {
+              const num = pos.map(([rr, cc]) => grid[rr][cc]).join('');
+              if (!num.includes('null')) {
+                result.push(num);
+              }
+            }
+          }
+        }
+      }
+
+      // 检查所有Z型
+      for (let r = 0; r < h; r++) {
+        for (let c = 0; c < w; c++) {
+          for (let shape of zShapes) {
+            const pos = shape.map(([dr, dc]) => [r + dr, c + dc]);
+            if (pos.every(([rr, cc]) => rr < h && cc < w)) {
+              const num = pos.map(([rr, cc]) => grid[rr][cc]).join('');
+              if (!num.includes('null')) {
+                result.push(num);
+              }
+            }
+          }
+        }
+      }
+
+      // 检查所有T型
+      for (let r = 0; r < h; r++) {
+        for (let c = 0; c < w; c++) {
+          for (let shape of tShapes) {
+            const pos = shape.map(([dr, dc]) => [r + dr, c + dc]);
+            if (pos.every(([rr, cc]) => rr < h && cc < w)) {
+              const num = pos.map(([rr, cc]) => grid[rr][cc]).join('');
+              if (!num.includes('null')) {
+                result.push(num);
+              }
+            }
+          }
+        }
+      }
+
+      // 检查其他形状
+      for (let r = 0; r < h; r++) {
+        for (let c = 0; c < w; c++) {
+          for (let shape of shapeOffsets) {
+            const pos = shape.map(([dr, dc]) => [r + dr, c + dc]);
+            if (pos.every(([rr, cc]) => rr < h && cc < w)) {
+              const num = pos.map(([rr, cc]) => grid[rr][cc]).join('');
+              if (!num.includes('null')) {
+                result.push(num);
+              }
+            }
+          }
+        }
+      }
+
+      return result;
+    }
+
+    function renderGrid(grid, elementId) {
+      const container = document.getElementById(elementId);
+      container.innerHTML = '';
+      for (let r = 0; r < grid.length; r++) {
+        for (let c = 0; c < grid[0].length; c++) {
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          cell.innerText = grid[r][c] === null ? '' : grid[r][c];
+          container.appendChild(cell);
+        }
+      }
+    }
+
+    function generateAll() {
+      const drawInput = document.getElementById('draw').value.trim();
+      const lucky = parseInt(document.getElementById('lucky').value);
+      const match = drawInput.match(/^(\d{3})\/(\d{2})$/);
+      if (!match) {
+        alert('格式错误，应为例如 200/25');
+        return;
+      }
+      const mainNumberStr = match[1];
+      const digits = mainNumberStr.split('').map(Number);
+      const issueDigit = parseInt(match[2][1]);
+      const mainGrid = generateMainGrid(digits, issueDigit);
+      const subGrid = generateSubGrid(digits);
+      renderGrid(mainGrid, 'mainGrid');
+      renderGrid(subGrid, 'subGrid');
+      
+      let allNumbers = getShapes(mainGrid).concat(getShapes(subGrid));
+      
+      // 去重逻辑：将数字排序后比较，避免顺序不同但数字相同的组合
+      const uniqueNumbers = [];
+      const seen = new Set();
+      
+      for (const num of allNumbers) {
+        // 将数字拆分成数组，排序后再组合成字符串进行比较
+        const sorted = num.split('').sort().join('');
+        if (!seen.has(sorted) && num.includes(lucky.toString())) {
+          seen.add(sorted);
+          uniqueNumbers.push(num);
+        }
+      }
+      
+      // 限制显示数量
+      const displayNumbers = uniqueNumbers.slice(0, 100);
+      const grouped = displayNumbers.reduce((acc, val, i) => {
+        if (i % 5 === 0) acc.push([]);
+        acc[acc.length - 1].push(val);
+        return acc;
+      }, []);
+      
+      const resultText = grouped.map((row) => row.join('    ')).join('\n');
+      document.getElementById('result').innerText = resultText;
+    }
+  </script>
+</body>
+</html>
