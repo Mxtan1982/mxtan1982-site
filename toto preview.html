@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Malaysia 4D Lucky Generator</title>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: #000;
+      color: #ffd700;
+      padding: 20px;
+    }
+    h1 { color: #ffeb3b; font-size: 32px; }
+    label { font-weight: bold; }
+    .grid-container { margin-top: 20px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 60px);
+      grid-template-rows: repeat(6, 60px);
+      gap: 5px;
+      margin-bottom: 10px;
+    }
+    .cell {
+      border: 2px solid #ffa000;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      background: #212121;
+      color: #ffeb3b;
+      font-size: 20px;
+    }
+    input {
+      padding: 8px;
+      font-size: 16px;
+      background: #111;
+      color: #fff700;
+      border: 1px solid #ffa000;
+      border-radius: 4px;
+    }
+    button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      background-color: #ffeb3b;
+      color: #000;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover { background-color: #fff176; }
+    .result {
+      margin-top: 20px;
+      white-space: pre-wrap;
+      background: #111;
+      padding: 15px;
+      border: 1px solid #ffb300;
+      min-height: 120px;
+      font-family: monospace;
+      color: #ffe082;
+    }
+    h3 { color: #ffca28; }
+    .disclaimer {
+      margin-top: 40px;
+      padding: 15px;
+      border: 1px solid #ffb300;
+      background: #222;
+      color: #ffd54f;
+      font-size: 14px;
+      line-height: 1.5;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎰  Toto Lucky Generator</h1>
+  <label>Toto Draw no. 开彩期号（如 5991/25）：</label><br/>
+  <input type="text" id="draw" placeholder="例如：5991/25" />
+  <br /><br />
+  <label>Lucky Digit No. 幸运数字（0-9）：</label><br/>
+  <input type="number" id="lucky" min="0" max="9" />
+  <br />
+  <button onclick="showFakeAd()">🎰 看广告后生成幸运号码</button>
+
+  <div class="grid-container">
+    <h3>主图（4×6）</h3>
+    <div class="grid" id="mainGrid"></div>
+  </div>
+
+  <h3>🎯 当天 Lucky Number（含幸运数字）</h3>
+  <div class="result" id="result"></div>
+
+  <div class="disclaimer">
+    <strong>使用说明：</strong><br />
+    本软件适用于 Malaysia 4D，Toto Malaysia。<br />
+    请在输入框中填写开彩期号（格式如：5991/25），然后选择您的幸运号码（0-9）。<br />
+    点击“看广告后生成幸运号码”按钮，即可获得当天幸运号码组合。<br />
+    本应用仅供娱乐用途，不涉及博彩或金钱交易。<br />
+    This app is for entertainment purposes only and does not promote gambling.<br />
+    Good luck!
+  </div>
+
+  <script>
+    function showFakeAd() {
+      alert("📺 正在播放广告中（模拟 2 秒）...");
+      setTimeout(() => {
+        alert("✅ 广告已播放完，开始生成号码！");
+        generateAll();
+      }, 2000);
+    }
+
+    // ✅ TOTO 主图算法
+    function generateMainGridToto(drawInput) {
+      const [left, right] = drawInput.split('/');
+      if (!left || !right) {
+        alert('格式错误，应为 5991/25');
+        return null;
+      }
+      const a = parseInt(left[0]);
+      const b = parseInt(left[1]);
+      const c = parseInt(left[2]);
+      const d = parseInt(left[3]);
+      const e = parseInt(right[0]);
+      const f = parseInt(right[1]);
+
+      const five = [
+        (a + b) % 10,
+        (b + c) % 10,
+        (c + d) % 10,
+        (d + e) % 10,
+        (e + f) % 10
+      ];
+
+      const row1 = [
+        (five[0] + five[1]) % 10,
+        (five[1] + five[2]) % 10,
+        (five[2] + five[3]) % 10,
+        (five[3] + five[4]) % 10
+      ];
+
+      const grid = [];
+      grid[0] = row1;
+      for (let i = 1; i < 6; i++) {
+        grid[i] = grid[i - 1].map(n => (n + 6) % 10);
+      }
+      return grid;
+    }
+
+    function renderGrid(grid, elementId) {
+      const container = document.getElementById(elementId);
+      container.innerHTML = '';
+      for (let r = 0; r < grid.length; r++) {
+        for (let c = 0; c < grid[0].length; c++) {
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          cell.innerText = grid[r][c];
+          container.appendChild(cell);
+        }
+      }
+    }
+
+    function getShapes(grid) {
+      const result = [];
+      const h = grid.length;
+      const w = grid[0].length;
+      const lShapes = [
+        [[0,0],[1,0],[2,0],[2,1]], [[0,1],[1,1],[2,1],[2,0]],
+        [[0,0],[0,1],[1,1],[2,1]], [[0,1],[0,0],[1,0],[2,0]],
+        [[0,0],[0,1],[0,2],[1,0]], [[0,0],[0,1],[0,2],[1,2]],
+        [[1,0],[1,1],[1,2],[0,0]], [[1,0],[1,1],[1,2],[0,2]]
+      ];
+      const zShapes = [
+        [[0,0],[0,1],[1,1],[1,2]], [[1,0],[1,1],[0,1],[0,2]],
+        [[0,0],[1,0],[1,1],[2,1]], [[0,1],[1,1],[1,0],[2,0]]
+      ];
+      const tShapes = [
+        [[0,1],[1,0],[1,1],[1,2]], [[1,1],[0,0],[0,1],[0,2]],
+        [[1,0],[0,1],[1,1],[2,1]], [[1,1],[0,0],[1,0],[2,0]]
+      ];
+      const shapeOffsets = [
+        [[0,0],[0,1],[1,0],[1,1]],
+        [[0,0],[1,0],[2,0],[3,0]],
+        [[0,0],[0,1],[0,2],[0,3]],
+        [[0,0],[1,1],[2,2],[3,3]],
+        [[0,3],[1,2],[2,1],[3,0]]
+      ];
+      for (let r = 0; r < h; r++) {
+        for (let c = 0; c < w; c++) {
+          for (let shape of [...lShapes, ...zShapes, ...tShapes, ...shapeOffsets]) {
+            const pos = shape.map(([dr, dc]) => [r + dr, c + dc]);
+            if (pos.every(([rr, cc]) => rr < h && cc < w)) {
+              const num = pos.map(([rr, cc]) => grid[rr][cc]).join('');
+              if (!num.includes('null')) result.push(num);
+            }
+          }
+        }
+      }
+      return result;
+    }
+
+    function generateAll() {
+      const drawInput = document.getElementById('draw').value.trim();
+      const lucky = parseInt(document.getElementById('lucky').value);
+      const mainGrid = generateMainGridToto(drawInput);
+      if (!mainGrid) return;
+      renderGrid(mainGrid, 'mainGrid');
+
+      const allNumbers = getShapes(mainGrid);
+      const uniqueNumbers = [];
+      const seen = new Set();
+      for (const num of allNumbers) {
+        const sorted = num.split('').sort().join('');
+        if (!seen.has(sorted) && num.includes(lucky.toString())) {
+          seen.add(sorted);
+          uniqueNumbers.push(num);
+        }
+      }
+      const displayNumbers = uniqueNumbers.slice(0, 100);
+      const grouped = displayNumbers.reduce((acc, val, i) => {
+        if (i % 5 === 0) acc.push([]);
+        acc[acc.length - 1].push(val);
+        return acc;
+      }, []);
+      const resultText = grouped.map((row) => row.join('    ')).join('\n');
+      document.getElementById('result').innerText = resultText;
+    }
+  </script>
+</body>
+</html>
